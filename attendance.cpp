@@ -3,7 +3,7 @@
 
 using namespace std;
 
-const int MAX_COL = 10;
+const int MAX_COL = 10;;
 
 int main() {
 

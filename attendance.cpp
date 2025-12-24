@@ -19,24 +19,97 @@ void setupSheet(string &sheetName, int &numCols, string columnNames[]) {
 
     /* ================= SHEET NAME ================= */
 
-    cout << "Enter attendance sheet name: ";
-    getline(cin, sheetName);
+
+    bool onlySpaces = true;
+
+    do{
+        cout << "Enter attendance sheet name: ";
+        getline(cin, sheetName);
+
+        for(int i = 0; i < sheetName.length(); i++) {
+            if (sheetName[i] != ' '){
+                onlySpaces = false;
+                break;
+            }
+        }
+
+        if (sheetName.empty() || onlySpaces)
+            cout << "Error: Sheet name is empty. Please enter a name." << endl;
+
+
+    } while (sheetName.empty() || onlySpaces);
 
     cout << "\nAttendance sheet \"" << sheetName
          << "\" created successfully.\n\n";
 
     /* ================= COLUMN SETUP ================= */
 
-    cout << "Define number of columns (max 10): ";
-    cin >> numCols;
-    cin.ignore();
 
-    if (numCols > MAX_COL)
-        numCols = MAX_COL;
+    bool valid;
+    do {
+        string input;
+        cout << "Define number of columns (max 10): ";
+        getline(cin, input);
+
+
+        valid = true;
+
+        if (input.empty()) {
+        cout << "Error: Input cannot be empty.\n";
+        valid = false;
+        continue;  // skip the rest of this iteration
+        }
+
+        // Check if all characters are digits
+        for (int i = 0; i < input.length(); i++) {
+            if (input[i] < '0' || input[i] > '9') {
+                valid = false;
+                break;
+            }
+        }
+
+        if (!valid) {
+            cout << "Error: Please enter a valid integer.\n";
+            continue;  // skip conversion and range check
+        }
+
+        // Convert string to integer manually or using stoi
+        numCols = stoi(input);
+
+        // Check range
+        if (numCols < 1 || numCols > 10) {
+            cout << "Error: Number of columns must be between 1 and 10.\n";
+            valid = false;
+        }
+
+    } while (!valid);
+
+
+
 
     for (int i = 0; i < numCols; i++) {
-        cout << "Enter column " << i + 1 << " name: ";
-        getline(cin, columnNames[i]);
+        string input;
+        bool onlySpaces;
+
+        do {
+            cout << "Enter column " << i + 1 << " name: ";
+            getline(cin, input);
+
+            // check if input is empty or only spaces
+            onlySpaces = true;
+            for (int j = 0; j < input.length(); j++) {
+                if (input[j] != ' ') {
+                    onlySpaces = false;
+                    break;
+                }
+            }
+
+            if (input.empty() || onlySpaces)
+                cout << "Error: Column name cannot be empty or just spaces. Please enter again.\n";
+
+        } while (input.empty() || onlySpaces);
+
+        columnNames[i] = input;  // store valid column name
     }
 
     /* ================= DISPLAY SHEET STRUCTURE ================= */

@@ -6,6 +6,41 @@ using namespace std;
 const int MAX_COL = 10;
 const int MAX_ROWS = 100;  // Maximum number of rows that can be stored
 
+// Function to insert attendance rows into the sheet
+void insertAttendanceRows(string attendanceData[][MAX_COL], int& rowCount,
+    string columnNames[], int numCols) {
+
+    char continueInsert = 'y';
+
+    while (continueInsert == 'y' || continueInsert == 'Y') {
+        if (rowCount >= MAX_ROWS) {
+            cout << "Maximum number of rows (" << MAX_ROWS << ") reached.\n";
+            break;
+        }
+
+        cout << "Insert New Attendance Row\n";
+
+        // Get data for each column
+        for (int i = 0; i < numCols; i++) {
+            string input;
+            cout << "Enter " << columnNames[i] << ": ";
+            getline(cin, input);
+            attendanceData[rowCount][i] = input;
+        }
+
+        rowCount++;
+        cout << "Row inserted successfully.\n\n";
+
+        // Ask if user wants to insert another row
+        cout << "Do you want to insert another row? (y/n): ";
+        cin >> continueInsert;
+        cin.ignore();  // Clear the newline character
+        cout << "\n";
+    }
+
+    cout << "Total rows inserted: " << rowCount << "\n\n";
+}
+
 int main() {
 
     string sheetName;
@@ -55,35 +90,7 @@ int main() {
 
     /* ================= INSERT ATTENDANCE ROWS ================= */
 
-    char continueInsert = 'y';
-
-    while (continueInsert == 'y' || continueInsert == 'Y') {
-        if (rowCount >= MAX_ROWS) {
-            cout << "Maximum number of rows (" << MAX_ROWS << ") reached.\n";
-            break;
-        }
-
-        cout << "Insert New Attendance Row\n";
-
-        // Get data for each column
-        for (int i = 0; i < numCols; i++) {
-            string input;
-            cout << "Enter " << columnNames[i] << ": ";
-            getline(cin, input);
-            attendanceData[rowCount][i] = input;
-        }
-
-        rowCount++;
-        cout << "Row inserted successfully.\n\n";
-
-        // Ask if user wants to insert another row
-        cout << "Do you want to insert another row? (y/n): ";
-        cin >> continueInsert;
-        cin.ignore();  // Clear the newline character
-        cout << "\n";
-    }
-
-    cout << "Total rows inserted: " << rowCount << "\n\n";
+    insertAttendanceRows(attendanceData, &:rowCount, columnNames, numCols);
 
     return 0;
 }

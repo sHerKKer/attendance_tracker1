@@ -20,9 +20,12 @@ void setupSheet(string &sheetName, int &numCols, string columnNames[]) {
     /* ================= SHEET NAME ================= */
 
 
-    bool onlySpaces = true;
+    bool onlySpaces;
 
     do{
+
+        onlySpaces = true;
+
         cout << "Enter attendance sheet name: ";
         getline(cin, sheetName);
 
@@ -128,6 +131,25 @@ void setupSheet(string &sheetName, int &numCols, string columnNames[]) {
 }
 
 // Function to insert attendance rows into the sheet
+
+bool isValidInt(const string &input) {
+    if (input.empty()) return false;
+    for (int i = 0; i < input.length(); i++) {
+        if (input[i] < '0' || input[i] > '9')
+            return false;
+    }
+    return true;
+}
+
+bool isIntColumn(const string &columnName) {
+    for (int i = 0; i <= columnName.length() - 3; i++) {
+        if (columnName[i] == 'I' && columnName[i+1] == 'N' && columnName[i+2] == 'T')
+            return true;
+    }
+    return false;
+}
+
+
 void insertAttendanceRows(string attendanceData[][MAX_COL], int& rowCount, string columnNames[], int numCols) {
 
     char continueInsert = 'y';
@@ -140,23 +162,47 @@ void insertAttendanceRows(string attendanceData[][MAX_COL], int& rowCount, strin
 
         cout << "Insert New Attendance Row\n";
 
-        // Get data for each column
-        for (int i = 0; i < numCols; i++) {
-            string input;
+    // Get data for each column with validation
+    for (int i = 0; i < numCols; i++) {
+        string input;
+
+        do {
             cout << "Enter " << columnNames[i] << ": ";
             getline(cin, input);
-            attendanceData[rowCount][i] = input;
-        }
+
+            if (input.empty()) {
+                cout << "Error: Input cannot be empty. Please enter again.\n";
+            }
+            else if (isIntColumn(columnNames[i]) && !isValidInt(input)) {
+                cout << "Error: Invalid INT value. Please enter a number.\n";
+            }
+            else {
+                break;  // valid input
+            }
+
+        } while (true);
+
+        attendanceData[rowCount][i] = input; // store input
+    }
 
         rowCount++;
         cout << "Row inserted successfully.\n\n";
 
+    do {
         // Ask if user wants to insert another row
         cout << "Do you want to insert another row? (y/n): ";
         cin >> continueInsert;
         cin.ignore();  // Clear the newline character
+
+        if (continueInsert != 'y' && continueInsert != 'Y' && continueInsert!= 'n' && continueInsert != 'N')
+        {
+            cout << "Error: Please enter y or n only.\n";
+        }
+    } while (continueInsert != 'y' && continueInsert != 'Y' && continueInsert != 'n' && continueInsert != 'N');
+
         cout << "\n";
     }
+
 
     cout << "Total rows inserted: " << rowCount << "\n\n";
 }

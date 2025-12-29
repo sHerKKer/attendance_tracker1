@@ -48,44 +48,24 @@ void setupSheet(string &sheetName, int &numCols, string columnNames[]) {
     /* ================= COLUMN SETUP ================= */
 
 
-    bool valid;
     do {
-        string input;
         cout << "Define number of columns (max 10): ";
-        getline(cin, input);
+        cin >> numCols;
 
-
-        valid = true;
-
-        if (input.empty()) {
-        cout << "Error: Input cannot be empty.\n";
-        valid = false;
-        continue;  // skip the rest of this iteration
+        if (cin.fail()) {
+            cout << "Error: Please enter a number.\n";
+            cin.clear();
+            cin.ignore(1000, '\n');
+        }
+        else if (numCols < 1 || numCols > 10) {
+            cout << "Error: Number must be between 1 and 10.\n";
+        }
+        else {
+            cin.ignore(1000, '\n');
+            break;
         }
 
-        // Check if all characters are digits
-        for (int i = 0; i < input.length(); i++) {
-            if (input[i] < '0' || input[i] > '9') {
-                valid = false;
-                break;
-            }
-        }
-
-        if (!valid) {
-            cout << "Error: Please enter a valid integer.\n";
-            continue;  // skip conversion and range check
-        }
-
-        // Convert string to integer manually or using stoi
-        numCols = stoi(input);
-
-        // Check range
-        if (numCols < 1 || numCols > 10) {
-            cout << "Error: Number of columns must be between 1 and 10.\n";
-            valid = false;
-        }
-
-    } while (!valid);
+    } while (true);
 
 
 

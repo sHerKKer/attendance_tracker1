@@ -1,3 +1,21 @@
+// *********************************************************
+// Program: TC1L_Group04_main.cpp
+// Course: CCP6114 Programming Fundamentals
+// Lecture Class: TC1L
+// Tutorial Class: TT2L
+// Trimester: 2530
+// Member_1: 252UC241V4 | MEGAT HAKIM BIN MEGAT ZUBAIRY           | MEGAT.HAKIM.MEGAT1@student.mmu.edu.my      | 019-2317372
+// Member_2: 252UC241P4 | MUHAMMAD AZIM IRFAN BIN HILMI           | MUHAMMAD.AZIM.IRFAN1@student.mmu.edu.my    | 011-29722356
+// Member_3: 252UC24328 | MUHAMMAD NAFIS BIN MOHAMED ASLAM        | MUHAMMAD.NAFIS.MOHAMED1@student.mmu.edu.my | 011-61671600
+// Member_4: 252UC25344 | MUHAMMAD KHAIR ASYRAF BIN KHAIDIR KHANA | MUHAMMAD.KHAIR.ASYRAF@student.mmu.edu.my   | 012-4996208
+// *********************************************************
+// Task Distribution
+// Member_1: Implemented the CSV mode display function [ displayCSV() ] as well as the flowchart/pseudocode for it.
+// Member_2: Worked on insert rows into attendance sheet as well as the flowchart/pseudocode for it.
+// Member_3: Worked on the basic error handling and input validation as well as the flowchart/pseudocode for it.
+// Member_4: Implemented the attendance sheet structure section, prepared the corresponding flowchart and pseudocode for it.
+// *********************************************************
+
 #include <iostream>
 #include <string>
 #include <iomanip>

@@ -19,6 +19,7 @@
 #include <iostream>
 #include <string>
 #include <iomanip>
+#include <limits>
 
 using namespace std;
 
@@ -140,8 +141,13 @@ bool isValidInt(const string &input) {
 }
 
 bool isIntColumn(const string &columnName) {
+    if (columnName.length() < 3)
+        return false;
+
     for (int i = 0; i <= columnName.length() - 3; i++) {
-        if (columnName[i] == 'I' && columnName[i+1] == 'N' && columnName[i+2] == 'T')
+        if (columnName[i] == 'I' &&
+            columnName[i+1] == 'N' &&
+            columnName[i+2] == 'T')
             return true;
     }
     return false;
@@ -190,7 +196,7 @@ void insertAttendanceRows(string attendanceData[][MAX_COL], int& rowCount, strin
         // Ask if user wants to insert another row
         cout << "Do you want to insert another row? (y/n): ";
         cin >> continueInsert;
-        cin.ignore();  // Clear the newline character
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
         if (continueInsert != 'y' && continueInsert != 'Y' && continueInsert!= 'n' && continueInsert != 'N')
         {

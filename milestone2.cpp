@@ -289,8 +289,8 @@ void displayCSV(string attendanceData[][MAX_COL], int& rowCount, string columnNa
 
 // Main Function
 int main() {
-
     string termName;
+    string filename;
 
     cout << "===========================================\n";
     cout << "   STUDENT ATTENDANCE TRACKER - MILESTONE 2\n";
@@ -301,29 +301,30 @@ int main() {
     cout << "Enter term name: ";
     getline(cin, termName);
 
-    cout << "Database \"" << termName << "\" created and loaded.\n\n";
+    filename = termName + ".csv";
 
-    // THIS is the actual "database"
-    string databaseFile = termName + "_Week1_Attendance.csv";
+    ifstream inFile(filename.c_str());
 
-    cout << "Reading attendance data from file...\n";
+    if (!inFile) {
+        // File does NOT exist ? create it
+        ofstream outFile(filename.c_str());
 
-    ifstream file(databaseFile.c_str());
+        if (!outFile) {
+            cout << "Error: Unable to create database file.\n";
+            return 0;
+        }
 
-    if (!file) {
-        cout << "Error: " << databaseFile << " not found.\n";
+        cout << "Database \"" << filename << "\" created successfully.\n";
+        outFile.close();
     }
     else {
-        cout << "Successfully loaded: " << databaseFile << "\n\n";
-
-        string line;
-        while (getline(file, line)) {
-            cout << line << endl;
-        }
+        cout << "Database \"" << filename << "\" loaded successfully.\n";
+        inFile.close();
     }
 
-    file.close();
+    cout << "\nReading attendance data from file...\n";
+
+    readFromCSV(termName);
+
     return 0;
 }
-
-

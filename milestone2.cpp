@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <limits>
 #include <fstream>
+#include <sstream>
 
 using namespace std;
 
@@ -45,28 +46,46 @@ void writeToCSV(const string& termName,
     cout << "Attendance saved to file: " << filename << "\n\n";
 }
 
-void readFromCSV(const string& termName)
+void readFromCSV(const string& termName,
+                 string attendanceData[][MAX_COL],
+                 int& rowCount,
+                 string columnNames[],
+                 int& numCols)
 {
-    string filename = termName + ".csv";
-    ifstream file(filename.c_str());
+    ifstream file((termName + ".csv").c_str());
 
     if (!file) {
-        cout << "Error: CSV file not found.\n";
+        cout << "Error: Unable to open CSV file.\n";
         return;
     }
 
-    cout << "--------------------------------------------------\n";
-    cout << "   Viewing Attendance Sheet from CSV File\n";
-    cout << "--------------------------------------------------\n";
+    string line, cell;
+    rowCount = 0;
+    numCols = 0;
 
-    string line;
-    while (getline(file, line)) {
-        cout << line << endl;
+    // Read header (column names)
+    if (getline(file, line)) {
+        stringstream ss(line);
+        while (getline(ss, cell, ',')) {
+            columnNames[numCols++] = cell;
+        }
     }
 
-    cout << endl;
+    // Read attendance rows
+    while (getline(file, line)) {
+        stringstream rowStream(line);
+        int col = 0;
+
+        while (getline(rowStream, cell, ',')) {
+            attendanceData[rowCount][col++] = cell;
+        }
+        rowCount++;
+    }
+
     file.close();
 }
+
+
 
 /////
 
@@ -288,9 +307,13 @@ void displayCSV(string attendanceData[][MAX_COL], int& rowCount, string columnNa
 
 
 // Main Function
-int main() {
+int main()
+{
     string termName;
-    string filename;
+    string attendanceData[MAX_ROWS][MAX_COL];
+    string columnNames[MAX_COL];
+    int rowCount = 0;
+    int numCols = 0;
 
     cout << "===========================================\n";
     cout << "   STUDENT ATTENDANCE TRACKER - MILESTONE 2\n";
@@ -301,30 +324,29 @@ int main() {
     cout << "Enter term name: ";
     getline(cin, termName);
 
-    filename = termName + ".csv";
-
+    string filename = termName + ".csv";
     ifstream inFile(filename.c_str());
 
     if (!inFile) {
-        // File does NOT exist ? create it
-        ofstream outFile(filename.c_str());
+        // CSV does not exist ? create using Milestone 1 logic
+        cout << "\nNo existing database found.\n";
+        cout << "Creating new attendance sheet...\n\n";
 
-        if (!outFile) {
-            cout << "Error: Unable to create database file.\n";
-            return 0;
-        }
+        setupSheet(termName, numCols, columnNames);
 
-        cout << "Database \"" << filename << "\" created successfully.\n";
-        outFile.close();
+        // Save empty sheet to CSV
+        writeToCSV(termName, attendanceData, rowCount, columnNames, numCols);
     }
     else {
         cout << "Database \"" << filename << "\" loaded successfully.\n";
         inFile.close();
+
+        // Load CSV into Milestone 1 structures
+        readFromCSV(termName, attendanceData, rowCount, columnNames, numCols);
     }
 
-    cout << "\nReading attendance data from file...\n";
-
-    readFromCSV(termName);
+    // Display using Milestone 1 function
+    displayCSV(attendanceData, rowCount, columnNames, numCols);
 
     return 0;
 }

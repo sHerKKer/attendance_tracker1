@@ -1,117 +1,36 @@
-#include <iostream>
-#include <string>
-#include <iomanip>
-#include <limits>
 #include <fstream>
-#include <sstream>
+#include <iomanip>
+#include <iostream>
+#include <limits>
+#include <string>
 
 using namespace std;
 
 const int MAX_COL = 10;
-const int MAX_ROWS = 100;  // Maximum number of rows that can be stored
-
-void writeToCSV(const string& termName,
-                string attendanceData[][MAX_COL],
-                int rowCount,
-                string columnNames[],
-                int numCols)
-{
-    string filename = termName + ".csv";
-    ofstream file(filename.c_str());
-
-    if (!file) {
-        cout << "Error: Unable to create CSV file.\n";
-        return;
-    }
-
-    // Write header
-    for (int i = 0; i < numCols; i++) {
-        file << columnNames[i];
-        if (i < numCols - 1)
-            file << ",";
-    }
-    file << "\n";
-
-    // Write rows
-    for (int i = 0; i < rowCount; i++) {
-        for (int j = 0; j < numCols; j++) {
-            file << attendanceData[i][j];
-            if (j < numCols - 1)
-                file << ",";
-        }
-        file << "\n";
-    }
-
-    file.close();
-    cout << "Attendance saved to file: " << filename << "\n\n";
-}
-
-void readFromCSV(const string& termName,
-                 string attendanceData[][MAX_COL],
-                 int& rowCount,
-                 string columnNames[],
-                 int& numCols)
-{
-    ifstream file((termName + ".csv").c_str());
-
-    if (!file) {
-        cout << "Error: Unable to open CSV file.\n";
-        return;
-    }
-
-    string line, cell;
-    rowCount = 0;
-    numCols = 0;
-
-    // Read header (column names)
-    if (getline(file, line)) {
-        stringstream ss(line);
-        while (getline(ss, cell, ',')) {
-            columnNames[numCols++] = cell;
-        }
-    }
-
-    // Read attendance rows
-    while (getline(file, line)) {
-        stringstream rowStream(line);
-        int col = 0;
-
-        while (getline(rowStream, cell, ',')) {
-            attendanceData[rowCount][col++] = cell;
-        }
-        rowCount++;
-    }
-
-    file.close();
-}
-
-
-
-/////
+const int MAX_ROWS = 100; // Maximum number of rows that can be stored
 
 // Function to setup the sheet
-void setupSheet(string &sheetName, int &numCols, string columnNames[]) {
+void setupSheet(string& sheetName, int& numCols, string columnNames[]) {
 
     /* ================= HEADER ================= */
 
     cout << "===========================================\n";
-    cout << "   STUDENT ATTENDANCE TRACKER - MILESTONE 2\n";
+    cout << "   STUDENT ATTENDANCE TRACKER - MILESTONE 1\n";
     cout << "===========================================\n\n";
 
     /* ================= SHEET NAME ================= */
 
-
     bool onlySpaces;
 
-    do{
+    do {
 
         onlySpaces = true;
 
         cout << "Enter attendance sheet name: ";
         getline(cin, sheetName);
 
-        for(int i = 0; i < sheetName.length(); i++) {
-            if (sheetName[i] != ' '){
+        for (int i = 0; i < sheetName.length(); i++) {
+            if (sheetName[i] != ' ') {
                 onlySpaces = false;
                 break;
             }
@@ -120,14 +39,12 @@ void setupSheet(string &sheetName, int &numCols, string columnNames[]) {
         if (sheetName.empty() || onlySpaces)
             cout << "Error: Sheet name is empty. Please enter a name." << endl;
 
-
     } while (sheetName.empty() || onlySpaces);
 
     cout << "\nAttendance sheet \"" << sheetName
-         << "\" created successfully.\n\n";
+        << "\" created successfully.\n\n";
 
     /* ================= COLUMN SETUP ================= */
-
 
     do {
         cout << "Define number of columns (max 10): ";
@@ -148,9 +65,6 @@ void setupSheet(string &sheetName, int &numCols, string columnNames[]) {
 
     } while (true);
 
-
-
-
     for (int i = 0; i < numCols; i++) {
         string input;
         bool onlySpaces;
@@ -169,11 +83,12 @@ void setupSheet(string &sheetName, int &numCols, string columnNames[]) {
             }
 
             if (input.empty() || onlySpaces)
-                cout << "Error: Column name cannot be empty or just spaces. Please enter again.\n";
+                cout << "Error: Column name cannot be empty or just spaces. Please "
+                "enter again.\n";
 
         } while (input.empty() || onlySpaces);
 
-        columnNames[i] = input;  // store valid column name
+        columnNames[i] = input; // store valid column name
     }
 
     /* ================= DISPLAY SHEET STRUCTURE ================= */
@@ -193,8 +108,9 @@ void setupSheet(string &sheetName, int &numCols, string columnNames[]) {
 
 // Function to insert attendance rows into the sheet
 
-bool isValidInt(const string &input) {
-    if (input.empty()) return false;
+bool isValidInt(const string& input) {
+    if (input.empty())
+        return false;
     for (int i = 0; i < input.length(); i++) {
         if (input[i] < '0' || input[i] > '9')
             return false;
@@ -202,21 +118,20 @@ bool isValidInt(const string &input) {
     return true;
 }
 
-bool isIntColumn(const string &columnName) {
+bool isIntColumn(const string& columnName) {
     if (columnName.length() < 3)
         return false;
 
     for (int i = 0; i <= columnName.length() - 3; i++) {
-        if (columnName[i] == 'I' &&
-            columnName[i+1] == 'N' &&
-            columnName[i+2] == 'T')
+        if (columnName[i] == 'I' && columnName[i + 1] == 'N' &&
+            columnName[i + 2] == 'T')
             return true;
     }
     return false;
 }
 
-
-void insertAttendanceRows(string attendanceData[][MAX_COL], int& rowCount, string columnNames[], int numCols) {
+void insertAttendanceRows(string attendanceData[][MAX_COL], int& rowCount,
+    string columnNames[], int numCols) {
 
     char continueInsert = 'y';
 
@@ -228,62 +143,61 @@ void insertAttendanceRows(string attendanceData[][MAX_COL], int& rowCount, strin
 
         cout << "Insert New Attendance Row\n";
 
-    // Get data for each column with validation
-    for (int i = 0; i < numCols; i++) {
-        string input;
+        // Get data for each column with validation
+        for (int i = 0; i < numCols; i++) {
+            string input;
 
-        do {
-            cout << "Enter " << columnNames[i] << ": ";
-            getline(cin, input);
+            do {
+                cout << "Enter " << columnNames[i] << ": ";
+                getline(cin, input);
 
-            if (input.empty()) {
-                cout << "Error: Input cannot be empty. Please enter again.\n";
-            }
-            else if (isIntColumn(columnNames[i]) && !isValidInt(input)) {
-                cout << "Error: Invalid INT value. Please enter a number.\n";
-            }
-            else {
-                break;  // valid input
-            }
+                if (input.empty()) {
+                    cout << "Error: Input cannot be empty. Please enter again.\n";
+                }
+                else if (isIntColumn(columnNames[i]) && !isValidInt(input)) {
+                    cout << "Error: Invalid INT value. Please enter a number.\n";
+                }
+                else {
+                    break; // valid input
+                }
 
-        } while (true);
+            } while (true);
 
-        attendanceData[rowCount][i] = input; // store input
-    }
+            attendanceData[rowCount][i] = input; // store input
+        }
 
         rowCount++;
         cout << "Row inserted successfully.\n\n";
 
-    do {
-        // Ask if user wants to insert another row
-        cout << "Do you want to insert another row? (y/n): ";
-        cin >> continueInsert;
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        do {
+            // Ask if user wants to insert another row
+            cout << "Do you want to insert another row? (y/n): ";
+            cin >> continueInsert;
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-        if (continueInsert != 'y' && continueInsert != 'Y' && continueInsert!= 'n' && continueInsert != 'N')
-        {
-            cout << "Error: Please enter y or n only.\n";
-        }
-    } while (continueInsert != 'y' && continueInsert != 'Y' && continueInsert != 'n' && continueInsert != 'N');
+            if (continueInsert != 'y' && continueInsert != 'Y' &&
+                continueInsert != 'n' && continueInsert != 'N') {
+                cout << "Error: Please enter y or n only.\n";
+            }
+        } while (continueInsert != 'y' && continueInsert != 'Y' &&
+            continueInsert != 'n' && continueInsert != 'N');
 
         cout << "\n";
     }
-
 
     cout << "Total rows inserted: " << rowCount << "\n\n";
 }
 
 // Function to view attendance sheet in CSV mode
-void displayCSV(string attendanceData[][MAX_COL], int& rowCount, string columnNames[], int numCols)
-{
+void displayCSV(string attendanceData[][MAX_COL], int& rowCount,
+    string columnNames[], int numCols) {
 
     cout << "--------------------------------------------------------------\n";
     cout << "              View Attendance Sheet (CSV Mode)\n";
     cout << "--------------------------------------------------------------\n";
 
     // Print CSV header (Column)
-    for (int i = 0; i < numCols; i++)
-    {
+    for (int i = 0; i < numCols; i++) {
         cout << left << setw(20) << columnNames[i];
         if (i < numCols - 1)
             cout << ", ";
@@ -291,10 +205,9 @@ void displayCSV(string attendanceData[][MAX_COL], int& rowCount, string columnNa
     cout << endl;
 
     // Print CSV rows
-    for (int i = 0; i < rowCount; i++) //rowCount now = number of rows insert
+    for (int i = 0; i < rowCount; i++) // rowCount now = number of rows insert
     {
-        for (int j = 0; j < numCols; j++)
-        {
+        for (int j = 0; j < numCols; j++) {
             cout << left << setw(20) << attendanceData[i][j];
             if (j < numCols - 1)
                 cout << ", ";
@@ -305,48 +218,59 @@ void displayCSV(string attendanceData[][MAX_COL], int& rowCount, string columnNa
     cout << endl;
 }
 
+// Function to save attendance data to a CSV file
+void saveToCSV(string sheetName, string attendanceData[][MAX_COL], int rowCount,
+    string columnNames[], int numCols) {
+    string filename = sheetName + ".csv";
+    ofstream outFile(filename);
+
+    if (!outFile) {
+        cout << "Error: Could not create file " << filename << endl;
+        return;
+    }
+
+    // Write header
+    for (int i = 0; i < numCols; i++) {
+        outFile << columnNames[i];
+        if (i < numCols - 1)
+            outFile << ",";
+    }
+    outFile << endl;
+
+    // Write data
+    for (int i = 0; i < rowCount; i++) {
+        for (int j = 0; j < numCols; j++) {
+            outFile << attendanceData[i][j];
+            if (j < numCols - 1)
+                outFile << ",";
+        }
+        outFile << endl;
+    }
+
+    outFile.close();
+    cout << "Attendance data saved to " << filename << " successfully." << endl;
+}
 
 // Main Function
-int main()
-{
-    string termName;
-    string attendanceData[MAX_ROWS][MAX_COL];
+int main() {
+
+    string sheetName;
+    int numCols;
     string columnNames[MAX_COL];
-    int rowCount = 0;
-    int numCols = 0;
+    string attendanceData[MAX_ROWS][MAX_COL]; // array to store row data
+    int rowCount = 0; // Counter for number of rows inserted
 
-    cout << "===========================================\n";
-    cout << "   STUDENT ATTENDANCE TRACKER - MILESTONE 2\n";
-    cout << "===========================================\n\n";
+    /* ================= SETUP SHEET ================= */
+    setupSheet(sheetName, numCols, columnNames);
 
-    cout << "Create School Term (Database)\n";
-    cout << "-------------------------------------------\n";
-    cout << "Enter term name: ";
-    getline(cin, termName);
+    /* ================= INSERT ATTENDANCE ROWS ================= */
+    insertAttendanceRows(attendanceData, rowCount, columnNames, numCols);
 
-    string filename = termName + ".csv";
-    ifstream inFile(filename.c_str());
-
-    if (!inFile) {
-        // CSV does not exist ? create using Milestone 1 logic
-        cout << "\nNo existing database found.\n";
-        cout << "Creating new attendance sheet...\n\n";
-
-        setupSheet(termName, numCols, columnNames);
-
-        // Save empty sheet to CSV
-        writeToCSV(termName, attendanceData, rowCount, columnNames, numCols);
-    }
-    else {
-        cout << "Database \"" << filename << "\" loaded successfully.\n";
-        inFile.close();
-
-        // Load CSV into Milestone 1 structures
-        readFromCSV(termName, attendanceData, rowCount, columnNames, numCols);
-    }
-
-    // Display using Milestone 1 function
+    /* ================= CSV MODE ================= */
     displayCSV(attendanceData, rowCount, columnNames, numCols);
+
+    /* ================= SAVE TO CSV ================= */
+    saveToCSV(sheetName, attendanceData, rowCount, columnNames, numCols);
 
     return 0;
 }

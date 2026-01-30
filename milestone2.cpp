@@ -1,21 +1,96 @@
+#include <direct.h> // For _mkdir
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <limits>
+#include <sstream>
 #include <string>
+
 
 using namespace std;
 
 const int MAX_COL = 10;
 const int MAX_ROWS = 100; // Maximum number of rows that can be stored
 
-// Function to setup the sheet
+// Helper to strip quotes from a string
+string stripQuotes(string input) {
+    if (input.length() >= 2 && input.front() == '"' && input.back() == '"') {
+        return input.substr(1, input.length() - 2);
+    }
+    return input;
+}
+
+// Function to create a folder (Database)
+void createDatabase(string& termName) {
+    cout << "Create School Term (Database)\n";
+    cout << "-------------------------------------------\n";
+    cout << "Enter term name: ";
+    getline(cin, termName);
+
+    if (_mkdir(termName.c_str()) == 0) {
+        cout << "Database \"" << termName << "\" created and loaded.\n\n";
+    }
+    else {
+        cout << "Database \"" << termName
+            << "\" created and loaded (or already exists).\n\n";
+    }
+}
+
+// Function to load attendance data from a CSV file
+bool loadFromCSV(string filename, string attendanceData[][MAX_COL],
+    int& rowCount, string columnNames[], int& numCols) {
+    ifstream inFile(filename);
+    if (!inFile) {
+        cout << "Error: Could not open file " << filename << endl;
+        return false;
+    }
+
+    string line, token;
+    rowCount = 0;
+    numCols = 0;
+
+    cout << "Reading attendance data from file...\n";
+
+    // Read Header
+    if (getline(inFile, line)) {
+        stringstream ss(line);
+        while (getline(ss, token, ',')) {
+            if (!token.empty() && token.back() == '\r')
+                token.pop_back();
+            columnNames[numCols++] = stripQuotes(token);
+            if (numCols >= MAX_COL)
+                break;
+        }
+    }
+
+    // Read Data
+    while (getline(inFile, line) && rowCount < MAX_ROWS) {
+        if (line.empty())
+            continue;
+        stringstream ss(line);
+        int colIndex = 0;
+        while (getline(ss, token, ',')) {
+            if (!token.empty() && token.back() == '\r')
+                token.pop_back();
+            if (colIndex < MAX_COL) {
+                attendanceData[rowCount][colIndex++] = stripQuotes(token);
+            }
+        }
+        rowCount++;
+    }
+
+    inFile.close();
+    cout << "Successfully loaded: " << filename << "\n\n";
+    return true;
+}
+
+// Setup sheet (kept for structure but unused in this specific test)
 void setupSheet(string& sheetName, int& numCols, string columnNames[]) {
 
     /* ================= HEADER ================= */
 
     cout << "===========================================\n";
-    cout << "   STUDENT ATTENDANCE TRACKER - MILESTONE 1\n";
+    cout << "   STUDENT ATTENDANCE TRACKER - MILESTONE 2\n";
     cout << "===========================================\n\n";
 
     /* ================= SHEET NAME ================= */
@@ -218,20 +293,19 @@ void displayCSV(string attendanceData[][MAX_COL], int& rowCount,
     cout << endl;
 }
 
-// Function to save attendance data to a CSV file
-void saveToCSV(string sheetName, string attendanceData[][MAX_COL], int rowCount,
+// Function to save attendance data to a CSV file (modified support path)
+void saveToCSV(string path, string attendanceData[][MAX_COL], int rowCount,
     string columnNames[], int numCols) {
-    string filename = sheetName + ".csv";
-    ofstream outFile(filename);
+    ofstream outFile(path);
 
     if (!outFile) {
-        cout << "Error: Could not create file " << filename << endl;
+        cout << "Error: Could not create file " << path << endl;
         return;
     }
 
     // Write header
     for (int i = 0; i < numCols; i++) {
-        outFile << columnNames[i];
+        outFile << "\"" << columnNames[i] << "\"";
         if (i < numCols - 1)
             outFile << ",";
     }
@@ -240,7 +314,7 @@ void saveToCSV(string sheetName, string attendanceData[][MAX_COL], int rowCount,
     // Write data
     for (int i = 0; i < rowCount; i++) {
         for (int j = 0; j < numCols; j++) {
-            outFile << attendanceData[i][j];
+            outFile << "\"" << attendanceData[i][j] << "\"";
             if (j < numCols - 1)
                 outFile << ",";
         }
@@ -248,7 +322,7 @@ void saveToCSV(string sheetName, string attendanceData[][MAX_COL], int rowCount,
     }
 
     outFile.close();
-    cout << "Attendance data saved to " << filename << " successfully." << endl;
+    // cout << "Attendance data saved to " << path << " successfully." << endl;
 }
 
 // Main Function
@@ -260,17 +334,53 @@ int main() {
     string attendanceData[MAX_ROWS][MAX_COL]; // array to store row data
     int rowCount = 0; // Counter for number of rows inserted
 
-    /* ================= SETUP SHEET ================= */
-    setupSheet(sheetName, numCols, columnNames);
+    string termName;
+    string csvFilename;
 
-    /* ================= INSERT ATTENDANCE ROWS ================= */
-    insertAttendanceRows(attendanceData, rowCount, columnNames, numCols);
+    /* ================= CREATE DATABASE (TERM) ================= */
+    createDatabase(termName);
 
-    /* ================= CSV MODE ================= */
-    displayCSV(attendanceData, rowCount, columnNames, numCols);
+    /* ================= LOAD CSV ================= */
+    cout << "Enter CSV filename to load (e.g. "
+        "Trimester2530_Week1_Attendance.csv): ";
+    getline(cin, csvFilename);
 
-    /* ================= SAVE TO CSV ================= */
-    saveToCSV(sheetName, attendanceData, rowCount, columnNames, numCols);
+    if (loadFromCSV(csvFilename, attendanceData, rowCount, columnNames,
+        numCols)) {
+
+        /* ================= DISPLAY LOADED DATA ================= */
+        cout << "-------------------------------------------\n";
+        cout << "Current Attendance Sheet\n";
+        cout << "-------------------------------------------\n";
+
+        // Simple display as per screenshot (Comma separated)
+        for (int i = 0; i < numCols; i++) {
+            cout << columnNames[i];
+            if (i < numCols - 1)
+                cout << ", ";
+        }
+        cout << endl;
+
+        for (int i = 0; i < rowCount; i++) {
+            for (int j = 0; j < numCols; j++) {
+                cout << attendanceData[i][j];
+                if (j < numCols - 1)
+                    cout << ", ";
+            }
+            cout << endl;
+        }
+        cout << endl;
+
+        /* ================= SAVE TO DATABASE FOLDER ================= */
+        // Save a copy into the term folder
+        string savePath = termName + "/" + csvFilename;
+        saveToCSV(savePath, attendanceData, rowCount, columnNames, numCols);
+        cout << "Data saved to database folder: " << savePath << endl;
+
+    }
+    else {
+        cout << "Failed to load data. Exiting.\n";
+    }
 
     return 0;
 }

@@ -6,7 +6,6 @@
 #include <sstream>
 #include <string>
 
-
 using namespace std;
 
 const int MAX_COL = 10;
@@ -327,60 +326,86 @@ void saveToCSV(string path, string attendanceData[][MAX_COL], int rowCount,
 
 // Main Function
 int main() {
-
     string sheetName;
     int numCols;
     string columnNames[MAX_COL];
     string attendanceData[MAX_ROWS][MAX_COL]; // array to store row data
     int rowCount = 0; // Counter for number of rows inserted
-
     string termName;
     string csvFilename;
+    int choice;
 
-    /* ================= CREATE DATABASE (TERM) ================= */
-    createDatabase(termName);
+    do {
+        // Menu
 
-    /* ================= LOAD CSV ================= */
-    cout << "Enter CSV filename to load (e.g. "
-        "Trimester2530_Week1_Attendance.csv): ";
-    getline(cin, csvFilename);
-
-    if (loadFromCSV(csvFilename, attendanceData, rowCount, columnNames,
-        numCols)) {
-
-        /* ================= DISPLAY LOADED DATA ================= */
-        cout << "-------------------------------------------\n";
-        cout << "Current Attendance Sheet\n";
-        cout << "-------------------------------------------\n";
-
-        // Simple display as per screenshot (Comma separated)
-        for (int i = 0; i < numCols; i++) {
-            cout << columnNames[i];
-            if (i < numCols - 1)
-                cout << ", ";
-        }
+        cout << "===========================================\n";
+        cout << "   STUDENT ATTENDANCE TRACKER - MAIN MENU\n";
+        cout << "===========================================\n";
+        cout << "1. Create Attendance Sheet (Milestone 1)\n";
+        cout << "2. Create School Term (Database) (Milestone 2)\n";
+        cout << "0. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+        cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear buffer
         cout << endl;
 
-        for (int i = 0; i < rowCount; i++) {
-            for (int j = 0; j < numCols; j++) {
-                cout << attendanceData[i][j];
-                if (j < numCols - 1)
-                    cout << ", ";
+        switch (choice) {
+        case 1:
+            /* ================= MILESTONE 1 ================= */
+            rowCount = 0; // Reset row count for new sheet
+            setupSheet(sheetName, numCols, columnNames);
+            insertAttendanceRows(attendanceData, rowCount, columnNames, numCols);
+            displayCSV(attendanceData, rowCount, columnNames, numCols);
+            {
+                string filename = sheetName + ".csv";
+                saveToCSV(filename, attendanceData, rowCount, columnNames, numCols);
             }
-            cout << endl;
+            break;
+
+        case 2:
+            /* ================= MILESTONE 2 ================= */
+            createDatabase(termName);
+            cout << "Enter CSV filename to load (e.g. "
+                "Week1.csv): ";
+            getline(cin, csvFilename);
+
+            if (loadFromCSV(csvFilename, attendanceData, rowCount, columnNames,
+                numCols)) {
+                cout << "-------------------------------------------\n";
+                cout << "Current Attendance Sheet\n";
+                cout << "-------------------------------------------\n";
+                for (int i = 0; i < numCols; i++) {
+                    cout << columnNames[i];
+                    if (i < numCols - 1)
+                        cout << ", ";
+                }
+                cout << endl;
+                for (int i = 0; i < rowCount; i++) {
+                    for (int j = 0; j < numCols; j++) {
+                        cout << attendanceData[i][j];
+                        if (j < numCols - 1)
+                            cout << ", ";
+                    }
+                    cout << endl;
+                }
+                cout << endl;
+
+                string savePath = termName + "/" + csvFilename;
+                saveToCSV(savePath, attendanceData, rowCount, columnNames, numCols);
+                cout << "Data saved to database folder: " << savePath << endl;
+            }
+            break;
+
+        case 0:
+            cout << "Exiting program.\n";
+            break;
+
+        default:
+            cout << "Invalid choice. Please try again.\n";
         }
-        cout << endl;
 
-        /* ================= SAVE TO DATABASE FOLDER ================= */
-        // Save a copy into the term folder
-        string savePath = termName + "/" + csvFilename;
-        saveToCSV(savePath, attendanceData, rowCount, columnNames, numCols);
-        cout << "Data saved to database folder: " << savePath << endl;
-
-    }
-    else {
-        cout << "Failed to load data. Exiting.\n";
-    }
+        cout << "\n";
+    } while (choice != 0);
 
     return 0;
 }

@@ -13,8 +13,11 @@ const int MAX_ROWS = 100; // Maximum number of rows that can be stored
 
 // Helper to strip quotes from a string
 string stripQuotes(string input) {
-    if (input.length() >= 2 && input.front() == '"' && input.back() == '"') {
-        return input.substr(1, input.length() - 2);
+    if (input.length() >= 2 && 
+		input[0] == '"' && 
+		input[input.length() - 1] == '"') {
+        
+		return input.substr(1, input.length() - 2);
     }
     return input;
 }
@@ -38,7 +41,7 @@ void createDatabase(string& termName) {
 // Function to load attendance data from a CSV file
 bool loadFromCSV(string filename, string attendanceData[][MAX_COL],
     int& rowCount, string columnNames[], int& numCols) {
-    ifstream inFile(filename);
+    ifstream inFile(filename.c_str());
     if (!inFile) {
         cout << "Error: Could not open file " << filename << endl;
         return false;
@@ -54,8 +57,8 @@ bool loadFromCSV(string filename, string attendanceData[][MAX_COL],
     if (getline(inFile, line)) {
         stringstream ss(line);
         while (getline(ss, token, ',')) {
-            if (!token.empty() && token.back() == '\r')
-                token.pop_back();
+            if (!token.empty() && token[token.length() - 1] == '\r')
+                token.erase(token.length() - 1);
             columnNames[numCols++] = stripQuotes(token);
             if (numCols >= MAX_COL)
                 break;
@@ -69,8 +72,8 @@ bool loadFromCSV(string filename, string attendanceData[][MAX_COL],
         stringstream ss(line);
         int colIndex = 0;
         while (getline(ss, token, ',')) {
-            if (!token.empty() && token.back() == '\r')
-                token.pop_back();
+            if (!token.empty() && token[token.length() - 1] == '\r')
+                token.erase(token.length() - 1);
             if (colIndex < MAX_COL) {
                 attendanceData[rowCount][colIndex++] = stripQuotes(token);
             }
@@ -295,7 +298,7 @@ void displayCSV(string attendanceData[][MAX_COL], int& rowCount,
 // Function to save attendance data to a CSV file (modified support path)
 void saveToCSV(string path, string attendanceData[][MAX_COL], int rowCount,
     string columnNames[], int numCols) {
-    ofstream outFile(path);
+    ofstream outFile(path.c_str());
 
     if (!outFile) {
         cout << "Error: Could not create file " << path << endl;
@@ -375,6 +378,59 @@ void updateAttendanceRow(string attendanceData[][MAX_COL], int rowCount,
     cout << "\nRow updated successfully.\n\n";
 }
 
+// Function to delete an attendance row
+void deleteAttendanceRow(string attendanceData[][MAX_COL],
+                         int& rowCount,
+                         string columnNames[],
+                         int numCols)
+{
+    if (rowCount == 0) {
+        cout << "No data to delete.\n\n";
+        return;
+    }
+
+    // Display data with row numbers
+    cout << "--------------------------------------------------------------\n";
+    cout << "                 Delete Attendance Row\n";
+    cout << "--------------------------------------------------------------\n";
+
+    cout << setw(5) << "No.";
+    for (int i = 0; i < numCols; i++) {
+        cout << left << setw(20) << columnNames[i];
+    }
+    cout << endl;
+
+    for (int i = 0; i < rowCount; i++) {
+        cout << setw(5) << i + 1;
+        for (int j = 0; j < numCols; j++) {
+            cout << left << setw(20) << attendanceData[i][j];
+        }
+        cout << endl;
+    }
+
+    int rowChoice;
+    cout << "\nEnter row number to delete (1 to " << rowCount << "): ";
+    cin >> rowChoice;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+    if (rowChoice < 1 || rowChoice > rowCount) {
+        cout << "Invalid row number.\n\n";
+        return;
+    }
+
+    int index = rowChoice - 1;
+
+    // Shift rows up
+    for (int i = index; i < rowCount - 1; i++) {
+        for (int j = 0; j < numCols; j++) {
+            attendanceData[i][j] = attendanceData[i + 1][j];
+        }
+    }
+
+    rowCount--;
+
+    cout << "Row deleted successfully.\n\n";
+}
 
 // Main Function
 int main() {
@@ -396,6 +452,7 @@ int main() {
         cout << "1. Create Attendance Sheet (CSV file)\n";
         cout << "2. Create School Term (Database)\n";
         cout << "3. Update Attendance Row\n";
+        cout << "4. Delete Attendance Row\n";
         cout << "0. Exit\n";
         cout << "Enter your choice: ";
         cin >> choice;
@@ -469,7 +526,27 @@ int main() {
                 }
                 break;
             }
-
+        case 4:
+			{
+			    string dbFolder;
+			    string csvFile;
+			
+			    cout << "Enter database folder name (if not created yet, please go to option 2): ";
+			    getline(cin, dbFolder);
+			
+			    cout << "Enter CSV filename to delete (example: filename.csv, must include .csv): ";
+			    getline(cin, csvFile);
+			
+			    string fullPath = dbFolder + "/" + csvFile;
+			
+			    if (loadFromCSV(fullPath, attendanceData, rowCount, columnNames, numCols)) {
+			        deleteAttendanceRow(attendanceData, rowCount, columnNames, numCols);
+			        saveToCSV(fullPath, attendanceData, rowCount, columnNames, numCols);
+			        cout << "Updated data saved to: " << fullPath << endl;
+			        displayCSV(attendanceData, rowCount, columnNames, numCols);
+			    }
+			    break;
+			}
         case 0:
             cout << "Exiting program.\n";
             break;

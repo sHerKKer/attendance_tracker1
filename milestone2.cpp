@@ -89,7 +89,7 @@ void setupSheet(string& sheetName, int& numCols, string columnNames[]) {
     /* ================= HEADER ================= */
 
     cout << "===========================================\n";
-    cout << "   STUDENT ATTENDANCE TRACKER - MILESTONE 2\n";
+    cout << "   STUDENT ATTENDANCE TRACKER - MILESTONE 1\n";
     cout << "===========================================\n\n";
 
     /* ================= SHEET NAME ================= */
@@ -115,7 +115,7 @@ void setupSheet(string& sheetName, int& numCols, string columnNames[]) {
 
     } while (sheetName.empty() || onlySpaces);
 
-    cout << "\nAttendance sheet \"" << sheetName
+    cout << "\nAttendance sheet \"" << sheetName << ".csv"
         << "\" created successfully.\n\n";
 
     /* ================= COLUMN SETUP ================= */
@@ -180,7 +180,7 @@ void setupSheet(string& sheetName, int& numCols, string columnNames[]) {
     cout << "Sheet setup completed successfully.\n\n";
 }
 
-// Function to insert attendance rows into the sheet
+// Function to insert attendance rows into the sheet (milestone 1)
 
 bool isValidInt(const string& input) {
     if (input.empty())
@@ -324,6 +324,58 @@ void saveToCSV(string path, string attendanceData[][MAX_COL], int rowCount,
     // cout << "Attendance data saved to " << path << " successfully." << endl;
 }
 
+// Function to update attendance rows in the database
+void updateAttendanceRow(string attendanceData[][MAX_COL], int rowCount,
+    string columnNames[], int numCols) {
+
+    if (rowCount == 0) {
+        cout << "No data to update.\n";
+        return;
+    }
+
+    displayCSV(attendanceData, rowCount, columnNames, numCols);
+
+    int rowChoice;
+
+    cout << "Enter row number to update (1 to " << rowCount << "): ";
+    cin >> rowChoice;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+    if (rowChoice < 1 || rowChoice > rowCount) {
+        cout << "Invalid row number.\n";
+        return;
+    }
+
+    int rowIndex = rowChoice - 1;
+
+    cout << "\nUpdating Row " << rowChoice << "\n";
+
+    for (int i = 0; i < numCols; i++) {
+        string input;
+
+        do {
+            cout << "Enter new " << columnNames[i]
+                 << " (current: " << attendanceData[rowIndex][i] << "): ";
+
+            getline(cin, input);
+
+            if (input.empty()) {
+                cout << "Cannot be empty.\n";
+            }
+            else if (isIntColumn(columnNames[i]) && !isValidInt(input)) {
+                cout << "Invalid INT value.\n";
+            }
+            else break;
+
+        } while (true);
+
+        attendanceData[rowIndex][i] = input;
+    }
+
+    cout << "\nRow updated successfully.\n\n";
+}
+
+
 // Main Function
 int main() {
     string sheetName;
@@ -341,8 +393,9 @@ int main() {
         cout << "===========================================\n";
         cout << "   STUDENT ATTENDANCE TRACKER - MAIN MENU\n";
         cout << "===========================================\n";
-        cout << "1. Create Attendance Sheet (Milestone 1)\n";
-        cout << "2. Create School Term (Database) (Milestone 2)\n";
+        cout << "1. Create Attendance Sheet (CSV file)\n";
+        cout << "2. Create School Term (Database)\n";
+        cout << "3. Update Attendance Row\n";
         cout << "0. Exit\n";
         cout << "Enter your choice: ";
         cin >> choice;
@@ -365,24 +418,23 @@ int main() {
         case 2:
             /* ================= MILESTONE 2 ================= */
             createDatabase(termName);
-            cout << "Enter CSV filename to load (e.g. "
-                "Week1.csv): ";
+            cout << "Enter CSV filename to load (example: filename.csv, must include .csv): ";
             getline(cin, csvFilename);
 
             if (loadFromCSV(csvFilename, attendanceData, rowCount, columnNames,
                 numCols)) {
-                cout << "-------------------------------------------\n";
-                cout << "Current Attendance Sheet\n";
-                cout << "-------------------------------------------\n";
+                cout << "--------------------------------------------------------------\n";
+                cout << "                 Current Attendance Sheet\n";
+                cout << "--------------------------------------------------------------\n";
                 for (int i = 0; i < numCols; i++) {
-                    cout << columnNames[i];
+                    cout << left << setw(20)<< columnNames[i];
                     if (i < numCols - 1)
                         cout << ", ";
                 }
                 cout << endl;
                 for (int i = 0; i < rowCount; i++) {
                     for (int j = 0; j < numCols; j++) {
-                        cout << attendanceData[i][j];
+                        cout << left << setw(20) << attendanceData[i][j];
                         if (j < numCols - 1)
                             cout << ", ";
                     }
@@ -395,6 +447,28 @@ int main() {
                 cout << "Data saved to database folder: " << savePath << endl;
             }
             break;
+       // Update attendance ro
+        case 3:
+            {
+                string dbFolder;
+                string csvFile;
+
+                cout << "Enter database folder name (if not created yet, please go to option 2): ";
+                getline(cin, dbFolder);
+
+                cout << "Enter CSV filename to update (example: filename.csv, must include .csv): ";
+                getline(cin, csvFile);
+
+                string fullPath = dbFolder + "/" + csvFile;
+
+                if (loadFromCSV(fullPath, attendanceData, rowCount, columnNames, numCols)) {
+                    updateAttendanceRow(attendanceData, rowCount, columnNames, numCols);
+                    saveToCSV(fullPath, attendanceData, rowCount, columnNames, numCols);
+                    cout << "Updated data saved to: " << fullPath << endl;
+                    displayCSV(attendanceData, rowCount, columnNames, numCols);
+                }
+                break;
+            }
 
         case 0:
             cout << "Exiting program.\n";

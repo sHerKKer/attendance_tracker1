@@ -341,6 +341,9 @@ void displayCSV(string attendanceData[][MAX_COL], int& rowCount,
     }
 
     cout << endl;
+
+    // Displays the count at the bottom of the sheet every time
+    cout << "Number of rows: " << rowCount << "\n\n";
 }
 
 // Function to save attendance data to a CSV file (modified support path)

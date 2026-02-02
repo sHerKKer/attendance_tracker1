@@ -28,7 +28,7 @@ bool isValidFilename(const string& name) {
     if (name.empty()) return false;
 
     for (char c : name) {
-        // Allow letters, numbers, and spaces. Block symbols like / \ : * ?
+
         if (!isalnum(c) && c != ' ' && c != '_' && c != '-') {
             return false;
         }
@@ -132,7 +132,7 @@ void setupSheet(string& sheetName, int& numCols, string columnNames[]) {
         cout << "Enter attendance sheet name: ";
         getline(cin, sheetName);
 
-        // 1. Your existing check (ensure it's not just spaces)
+
         for (int i = 0; i < sheetName.length(); i++) {
             if (sheetName[i] != ' ') {
                 onlySpaces = false;
@@ -143,7 +143,7 @@ void setupSheet(string& sheetName, int& numCols, string columnNames[]) {
         if (sheetName.empty() || onlySpaces) {
             cout << "Error: Sheet name is empty. Please enter a name." << endl;
         }
-        // 2. NEW CHECK: Is the filename valid? (Chapter 10)
+
         else if (!isValidFilename(sheetName)) {
             cout << "Error: Name contains illegal characters. Use letters and numbers only.\n";
             // Clear the name to force the loop to repeat
@@ -199,7 +199,7 @@ void setupSheet(string& sheetName, int& numCols, string columnNames[]) {
             if (input.empty() || onlySpaces) {
                 cout << "Error: Column name cannot be empty. Please enter again.\n";
             }
-            // 2. NEW CHECK: Linear Search for duplicates (Chapter 8)
+
             else {
                 for (int k = 0; k < i; k++) {
                     if (columnNames[k] == input) {
@@ -210,9 +210,9 @@ void setupSheet(string& sheetName, int& numCols, string columnNames[]) {
                 }
             }
 
-        } while (input.empty() || onlySpaces || isDuplicate); // Repeat if any error
+        } while (input.empty() || onlySpaces || isDuplicate);
 
-        columnNames[i] = input; // Store valid column name
+        columnNames[i] = input;
     }
 
     /* ================= DISPLAY SHEET STRUCTURE ================= */
@@ -413,7 +413,7 @@ void updateAttendanceRow(string attendanceData[][MAX_COL], int rowCount,
             cout << "Error: Row number " << rowChoice << " does not exist. Try again.\n\n";
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
         }
-        // Input is good
+
         else {
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             break;
@@ -485,7 +485,7 @@ int rowChoice;
         cout << "Enter row number to delete (1 to " << rowCount << "): ";
         cin >> rowChoice;
 
-        // Check if user entered text like "Tom"
+
         if (cin.fail()) {
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
@@ -496,7 +496,7 @@ int rowChoice;
             cout << "Error: Row number " << rowChoice << " does not exist. Try again.\n\n";
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
         }
-        // Input is good
+
         else {
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             break;
@@ -569,13 +569,21 @@ int main() {
             /* ================= MILESTONE 2 ================= */
             createDatabase(termName);
 
-            { // Scope block for local variables
+            {
                 bool fileLoaded = false;
 
                 // Loop until a valid file is actually loaded
                 while (!fileLoaded) {
-                cout << "Enter CSV filename to load (example: filename.csv, must include .csv): ";
-                getline(cin, csvFilename);
+
+                    cout << "Enter CSV filename to load (example: filename.csv, must include .csv) (or '00' to main menu): ";
+                    getline(cin, csvFilename);
+
+                    if (csvFilename == "00") {
+                        cout << "Returning to main menu...\n\n";
+                        break;
+                    }
+
+                    if (csvFilename.empty()) continue;
 
                     // 2. Try to open the file
                     if (loadFromCSV(csvFilename, attendanceData, rowCount, columnNames, numCols)) {
@@ -609,7 +617,7 @@ int main() {
                         cout << "Data saved to database folder: " << savePath << endl;
 
                     } else {
-                        // FAILURE: File didn't open. Loop repeats.
+
                         cout << "File could not be opened. Please try again.\n\n";
                     }
                 }
@@ -622,82 +630,75 @@ int main() {
                 string dbFolder;
                 string csvFile;
 
-                // Loop until we successfully open a valid file
                 while (!fileLoaded) {
 
-                    // 1. Get Database Folder Name
-                    do {
-                        cout << "Enter database folder name (if not created yet, go to option 2): ";
-                        getline(cin, dbFolder);
+                    // 1. Get Database Folder
+                    cout << "Enter database folder name (or '00' to main menu): ";
+                    getline(cin, dbFolder);
 
-                        if (!isValidFilename(dbFolder)) {
-                            cout << "Error: Illegal characters. Try again.\n";
-                            dbFolder = "";
-                        }
-                    } while (dbFolder.empty());
+                    if (dbFolder == "00") { cout << "Returning...\n\n"; break; }
+                    if (dbFolder.empty()) continue;
 
                     // 2. Get CSV Filename
-                    cout << "Enter CSV filename to update (example: filename.csv, must include .csv): ";
+                    cout << "Enter CSV filename to update (example: filename.csv, must include .csv)(or '00' to main menu): ";
                     getline(cin, csvFile);
+
+                    if (csvFile == "00") { cout << "Returning...\n\n"; break; }
+                    if (csvFile.empty()) continue;
 
                     string fullPath = dbFolder + "/" + csvFile;
 
                     // 3. Try to Load
                     if (loadFromCSV(fullPath, attendanceData, rowCount, columnNames, numCols)) {
-                        fileLoaded = true; // SUCCESS: Exit the loop
+                        fileLoaded = true;
 
-                        // Perform the Update
                         updateAttendanceRow(attendanceData, rowCount, columnNames, numCols);
                         saveToCSV(fullPath, attendanceData, rowCount, columnNames, numCols);
                         cout << "Updated data saved to: " << fullPath << endl;
                         displayCSV(attendanceData, rowCount, columnNames, numCols);
 
                     } else {
-                        // FAILURE: Could not open file
                         cout << "File not found in folder \"" << dbFolder << "\". Please try again.\n";
                         cout << "Tip: Make sure you created the database in Option 2 first.\n\n";
                     }
                 }
             }
             break;
+        //Delete Attendance Row
         case 4:
             {
                 bool fileLoaded = false;
                 string dbFolder;
                 string csvFile;
 
-                // Loop until we successfully open a valid file
                 while (!fileLoaded) {
 
-                    // 1. Get Database Folder Name
-                    do {
-                        cout << "Enter database folder name (if not created yet, go to option 2): ";
-                        getline(cin, dbFolder);
+                    // 1. Get Database Folder
+                    cout << "Enter database folder name (or '00' to main menu): ";
+                    getline(cin, dbFolder);
 
-                        if (!isValidFilename(dbFolder)) {
-                            cout << "Error: Illegal characters. Try again.\n";
-                            dbFolder = "";
-                        }
-                    } while (dbFolder.empty());
+                    if (dbFolder == "00") { cout << "Returning...\n\n"; break; }
+                    if (dbFolder.empty()) continue;
 
                     // 2. Get CSV Filename
-                    cout << "Enter CSV filename to delete (example: filename.csv, must include .csv): ";
+                    cout << "Enter CSV filename to delete (example: filename.csv, must include .csv)(or '00' to main menu): ";
                     getline(cin, csvFile);
+
+                    if (csvFile == "00") { cout << "Returning...\n\n"; break; }
+                    if (csvFile.empty()) continue;
 
                     string fullPath = dbFolder + "/" + csvFile;
 
                     // 3. Try to Load
                     if (loadFromCSV(fullPath, attendanceData, rowCount, columnNames, numCols)) {
-                        fileLoaded = true; // SUCCESS: Exit the loop
+                        fileLoaded = true;
 
-                        // Perform the Update
                         deleteAttendanceRow(attendanceData, rowCount, columnNames, numCols);
                         saveToCSV(fullPath, attendanceData, rowCount, columnNames, numCols);
                         cout << "Updated data saved to: " << fullPath << endl;
                         displayCSV(attendanceData, rowCount, columnNames, numCols);
 
                     } else {
-                        // FAILURE: Could not open file
                         cout << "File not found in folder \"" << dbFolder << "\". Please try again.\n";
                         cout << "Tip: Make sure you created the database in Option 2 first.\n\n";
                     }
